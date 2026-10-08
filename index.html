@@ -6,13 +6,10 @@
     <title>Mở Khóa Nội Dung</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        * {
-            box-sizing: border-box;
-        }
         body {
             background-color: #121212;
             color: #e0e0e0;
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -21,124 +18,97 @@
         }
         .box {
             background-color: #1e1e1e;
-            padding: 32px 24px;
+            padding: 30px;
             border-radius: 12px;
-            width: 90%;
+            width: 100%;
             max-width: 380px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
-            border: 1px solid #2a2a2a;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
         }
-        h2 {
-            margin-top: 0;
-            margin-bottom: 8px;
-            font-size: 22px;
-        }
-        p#subText {
-            color: #a0a0a0;
-            font-size: 14px;
-            margin-top: 0;
-            margin-bottom: 20px;
-        }
-        
-        /* Khung chứa input + icon mắt */
-        .password-wrapper {
+        .input-group {
             position: relative;
-            width: 100%;
-            margin-bottom: 16px;
+            width: 80%;
+            margin: 15px auto;
         }
-        .password-wrapper input {
+        input {
             width: 100%;
-            padding: 12px 42px 12px 14px;
-            background: #282828;
-            border: 1px solid #3a3a3a;
-            color: #ffffff;
-            border-radius: 8px;
-            font-size: 15px;
+            padding: 10px 40px 10px 12px;
+            background: #2c2c2c;
+            border: 1px solid #4a4a4a;
+            color: white;
+            border-radius: 6px;
+            box-sizing: border-box;
             outline: none;
-            transition: border-color 0.2s;
+            font-size: 14px;
         }
-        .password-wrapper input:focus {
-            border-color: #666;
+        input:focus {
+            border-color: #6c757d;
         }
-        .eye-icon {
+        /* Icon con mắt tối giản màu xám */
+        .toggle-eye {
             position: absolute;
             right: 12px;
             top: 50%;
             transform: translateY(-50%);
+            background: none;
+            border: none;
             cursor: pointer;
-            color: #888888;
+            padding: 0;
+            color: #888;
             display: flex;
             align-items: center;
-            justify-content: center;
-            user-select: none;
-            transition: color 0.2s;
         }
-        .eye-icon:hover {
-            color: #cccccc;
+        .toggle-eye svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
         }
-        .eye-icon svg {
-            width: 20px;
-            height: 20px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        /* Nút mở khóa bo tròn nhẹ & nổi cực nhẹ */
-        button.btn-unlock {
-            width: 100%;
-            padding: 12px 20px;
-            background: #2e2e2e;
-            color: #ffffff;
-            border: 1px solid #444444;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 500;
+        button.unlock-btn {
+            padding: 10px 24px;
+            background: #333333;
+            color: #e0e0e0;
+            border: 1px solid #4a4a4a;
+            border-radius: 6px; /* Bo tròn nhẹ */
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Hiệu ứng nổi rất nhẹ */
             transition: all 0.2s ease;
         }
-        button.btn-unlock:hover {
-            background: #383838;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
-            transform: translateY(-1px);
+        button.unlock-btn:hover {
+            background: #3d3d3d;
+            border-color: #5a5a5a;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         }
-        button.btn-unlock:active {
-            transform: translateY(0);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        button.unlock-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-
-        .error {
-            color: #ff5252;
-            margin-top: 14px;
-            margin-bottom: 0;
-            font-size: 13.5px;
-        }
-
-        /* Thông báo sao chép tùy chỉnh (Custom Toast) */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: #2d2d2d;
+        .error { color: #ff5252; margin-top: 10px; font-size: 13px; }
+        
+        /* Toast thông báo tùy chỉnh thay cho alert mặc định */
+        #customToast {
+            visibility: hidden;
+            min-width: 220px;
+            background-color: #2b2b2b;
             color: #fff;
-            padding: 12px 22px;
-            border-radius: 25px;
-            font-size: 14px;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-            border: 1px solid #444;
-            opacity: 0;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            pointer-events: none;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px 16px;
+            position: fixed;
             z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 13px;
+            border: 1px solid #444;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
         }
-        .toast.show {
+        #customToast.show {
+            visibility: visible;
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
@@ -146,34 +116,30 @@
 
     <div class="box" id="mainBox">
         <h2 id="charName">Đang kết nối...</h2>
-        <p id="subText">Vui lòng đợi giây lát</p>
+        <p id="subText" style="color: #999; font-size: 14px;">Vui lòng đợi giây lát</p>
         
         <div id="formArea" style="display:none;">
-            <div class="password-wrapper">
+            <div class="input-group">
                 <input type="password" id="passInput" placeholder="Nhập mật khẩu...">
-                <span class="eye-icon" id="togglePassword" onclick="togglePass()">
-                    <!-- SVG con mắt mở -->
-                    <svg id="eyeOpen" viewBox="0 0 24 24">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                        <circle cx="12" cy="12" r="3"></circle>
+                <button type="button" class="toggle-eye" onclick="togglePassword()" id="eyeBtn" title="Hiện/Ẩn mật khẩu">
+                    <!-- Icon con mắt nhắm (mặc định) -->
+                    <svg id="eyeIcon" viewBox="0 0 24 24">
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                     </svg>
-                    <!-- SVG con mắt đóng -->
-                    <svg id="eyeClosed" viewBox="0 0 24 24" style="display:none;">
-                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
-                        <line x1="1" y1="1" x2="23" y2="23"></line>
-                    </svg>
-                </span>
+                </button>
             </div>
-            <button class="btn-unlock" onclick="tryUnlock()">Mở khóa</button>
+            <br>
+            <button class="unlock-btn" onclick="tryUnlock()">Mở khóa</button>
         </div>
         
         <p class="error" id="errMsg"></p>
     </div>
 
-    <!-- Khung thông báo kiểu mới -->
-    <div id="toast" class="toast">Đã sao chép liên kết!</div>
+    <!-- Toast thông báo -->
+    <div id="customToast">Đã sao chép nội dung thành công!</div>
 
     <script>
+        // THAY THÔNG TIN SUPABASE CỦA BẠN VÀO ĐÂY
         const SUPABASE_URL = 'https://akufleimlxcnftsdmejq.supabase.co';
         const SUPABASE_KEY = 'sb_publishable_g4T5Js-z7iFpSF9ebl5xtQ_HJMUmOKB';
 
@@ -185,7 +151,7 @@
         async function init() {
             if (!charId) {
                 document.getElementById('charName').innerText = "Thiếu ID nhân vật!";
-                document.getElementById('subText').innerText = "Hãy truy cập dạng: ?id=ten_nhan_vat";
+                document.getElementById('subText').innerText = "Hãy truy cập đúng đường dẫn";
                 return;
             }
 
@@ -204,39 +170,12 @@
                     document.getElementById('formArea').style.display = 'block';
                 } else {
                     document.getElementById('charName').innerText = "Không tìm thấy!";
-                    document.getElementById('subText').innerText = "ID '" + charId + "' không tồn tại.";
+                    document.getElementById('subText').innerText = "ID không tồn tại trong hệ thống.";
                 }
             } catch (err) {
                 document.getElementById('charName').innerText = "Lỗi kết nối!";
                 document.getElementById('errMsg').innerText = err.message;
             }
-        }
-
-        // Bật/tắt ẩn hiện mật khẩu
-        function togglePass() {
-            const passInput = document.getElementById('passInput');
-            const eyeOpen = document.getElementById('eyeOpen');
-            const eyeClosed = document.getElementById('eyeClosed');
-
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                eyeOpen.style.display = 'none';
-                eyeClosed.style.display = 'block';
-            } else {
-                passInput.type = 'password';
-                eyeOpen.style.display = 'block';
-                eyeClosed.style.display = 'none';
-            }
-        }
-
-        // Hàm hiện thông báo tùy chỉnh
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
         }
 
         async function tryUnlock() {
@@ -253,6 +192,31 @@
             } else {
                 document.getElementById('errMsg').innerText = "Mật khẩu không chính xác!";
             }
+        }
+
+        // Hàm ẩn/hiện mật khẩu
+        function togglePassword() {
+            const passInput = document.getElementById('passInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                // Đổi icon sang mắt mở / gạch chéo nhẹ nếu muốn, ở đây dùng chung icon thay đổi trạng thái độ mờ
+                eyeIcon.style.opacity = '0.5';
+            } else {
+                passInput.type = 'password';
+                eyeIcon.style.opacity = '1';
+            }
+        }
+
+        // Hàm gọi toast thông báo tùy chỉnh (dùng khi bạn cần hiển thị thông báo thay cho alert mặc định)
+        function showToast(message) {
+            const toast = document.getElementById('customToast');
+            toast.innerText = message || "Đã sao chép thành công!";
+            toast.className = "show";
+            setTimeout(function(){ 
+                toast.className = toast.className.replace("show", ""); 
+            }, 3000);
         }
 
         init();
