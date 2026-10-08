@@ -32,20 +32,20 @@
         }
         input {
             width: 100%;
-            padding: 10px 40px 10px 12px;
+            padding: 12px 40px 12px 14px;
             background: #2c2c2c;
             border: 1px solid #4a4a4a;
             color: white;
-            border-radius: 6px;
+            border-radius: 8px;
             box-sizing: border-box;
             outline: none;
-            font-size: 14px;
+            transition: border-color 0.2s;
         }
         input:focus {
-            border-color: #6c757d;
+            border-color: #6c6c6c;
         }
         /* Icon con mắt tối giản màu xám */
-        .toggle-eye {
+        .toggle-password {
             position: absolute;
             right: 12px;
             top: 50%;
@@ -54,43 +54,43 @@
             border: none;
             cursor: pointer;
             padding: 0;
-            color: #888;
+            color: #888888;
             display: flex;
             align-items: center;
+            justify-content: center;
         }
-        .toggle-eye svg {
-            width: 18px;
-            height: 18px;
+        .toggle-password svg {
+            width: 20px;
+            height: 20px;
             fill: currentColor;
         }
         button.unlock-btn {
-            padding: 10px 24px;
-            background: #333333;
+            padding: 11px 24px;
+            background: #2b2b2b;
             color: #e0e0e0;
-            border: 1px solid #4a4a4a;
-            border-radius: 6px; /* Bo tròn nhẹ */
+            border: 1px solid #444444;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 14px;
             font-weight: 500;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Hiệu ứng nổi rất nhẹ */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
             transition: all 0.2s ease;
         }
         button.unlock-btn:hover {
-            background: #3d3d3d;
-            border-color: #5a5a5a;
+            background: #363636;
             box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            transform: translateY(-1px);
         }
         button.unlock-btn:active {
-            transform: translateY(1px);
+            transform: translateY(0);
             box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
-        .error { color: #ff5252; margin-top: 10px; font-size: 13px; }
+        .error { color: #ff5252; margin-top: 10px; font-size: 14px; }
         
-        /* Toast thông báo tùy chỉnh thay cho alert mặc định */
+        /* Toast thông báo sao chép tùy chỉnh */
         #customToast {
             visibility: hidden;
             min-width: 220px;
-            background-color: #2b2b2b;
+            background-color: #333333;
             color: #fff;
             text-align: center;
             border-radius: 6px;
@@ -100,15 +100,15 @@
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
-            font-size: 13px;
-            border: 1px solid #444;
             box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            font-size: 14px;
             opacity: 0;
-            transition: opacity 0.3s, visibility 0.3s;
+            transition: opacity 0.3s, bottom 0.3s;
         }
         #customToast.show {
             visibility: visible;
             opacity: 1;
+            bottom: 50px;
         }
     </style>
 </head>
@@ -116,13 +116,13 @@
 
     <div class="box" id="mainBox">
         <h2 id="charName">Đang kết nối...</h2>
-        <p id="subText" style="color: #999; font-size: 14px;">Vui lòng đợi giây lát</p>
+        <p id="subText">Vui lòng đợi giây lát</p>
         
         <div id="formArea" style="display:none;">
             <div class="input-group">
                 <input type="password" id="passInput" placeholder="Nhập mật khẩu...">
-                <button type="button" class="toggle-eye" onclick="togglePassword()" id="eyeBtn" title="Hiện/Ẩn mật khẩu">
-                    <!-- Icon con mắt nhắm (mặc định) -->
+                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">
+                    <!-- Icon mắt mở mặc định -->
                     <svg id="eyeIcon" viewBox="0 0 24 24">
                         <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
                     </svg>
@@ -135,7 +135,7 @@
         <p class="error" id="errMsg"></p>
     </div>
 
-    <!-- Toast thông báo -->
+    <!-- Toast thông báo tùy chỉnh -->
     <div id="customToast">Đã sao chép nội dung thành công!</div>
 
     <script>
@@ -145,13 +145,14 @@
 
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        // Lấy ID từ link (VD: ?id=goku)
         const urlParams = new URLSearchParams(window.location.search);
         const charId = urlParams.get('id');
 
         async function init() {
             if (!charId) {
                 document.getElementById('charName').innerText = "Thiếu ID nhân vật!";
-                document.getElementById('subText').innerText = "Hãy truy cập đúng đường dẫn";
+                document.getElementById('subText').innerText = "Hãy truy cập dạng: linkcuaweb.com/?id=ten_nhan_vat";
                 return;
             }
 
@@ -170,12 +171,38 @@
                     document.getElementById('formArea').style.display = 'block';
                 } else {
                     document.getElementById('charName').innerText = "Không tìm thấy!";
-                    document.getElementById('subText').innerText = "ID không tồn tại trong hệ thống.";
+                    document.getElementById('subText').innerText = "ID '" + charId + "' không tồn tại trong Supabase.";
                 }
             } catch (err) {
                 document.getElementById('charName').innerText = "Lỗi kết nối!";
                 document.getElementById('errMsg').innerText = err.message;
             }
+        }
+
+        // Hàm ẩn/hiển mật khẩu kèm thay đổi icon con mắt
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('passInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                // Đổi sang icon mắt gạch chéo (ẩn mật khẩu)
+                eyeIcon.innerHTML = '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.12c0-1.66-1.34-3-3-3l-.17.02z"/>';
+            } else {
+                passInput.type = 'password';
+                // Đổi về icon mắt bình thường
+                eyeIcon.innerHTML = '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+            }
+        }
+
+        // Hàm hiển thị thông báo toast tùy chỉnh thay cho prompt mặc định
+        function showToast(message) {
+            const toast = document.getElementById('customToast');
+            toast.innerText = message;
+            toast.className = "show";
+            setTimeout(function(){ 
+                toast.className = toast.className.replace("show", ""); 
+            }, 3000);
         }
 
         async function tryUnlock() {
@@ -192,31 +219,6 @@
             } else {
                 document.getElementById('errMsg').innerText = "Mật khẩu không chính xác!";
             }
-        }
-
-        // Hàm ẩn/hiện mật khẩu
-        function togglePassword() {
-            const passInput = document.getElementById('passInput');
-            const eyeIcon = document.getElementById('eyeIcon');
-            
-            if (passInput.type === 'password') {
-                passInput.type = 'text';
-                // Đổi icon sang mắt mở / gạch chéo nhẹ nếu muốn, ở đây dùng chung icon thay đổi trạng thái độ mờ
-                eyeIcon.style.opacity = '0.5';
-            } else {
-                passInput.type = 'password';
-                eyeIcon.style.opacity = '1';
-            }
-        }
-
-        // Hàm gọi toast thông báo tùy chỉnh (dùng khi bạn cần hiển thị thông báo thay cho alert mặc định)
-        function showToast(message) {
-            const toast = document.getElementById('customToast');
-            toast.innerText = message || "Đã sao chép thành công!";
-            toast.className = "show";
-            setTimeout(function(){ 
-                toast.className = toast.className.replace("show", ""); 
-            }, 3000);
         }
 
         init();
