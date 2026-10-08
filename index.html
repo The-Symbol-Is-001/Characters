@@ -4,442 +4,258 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mở Khóa Nội Dung</title>
-    <!-- Thư viện Supabase CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --input-bg: #2c2c2c;
-            --text-color: #e0e0e0;
-            --accent: #4a4a4a;
-            --accent-hover: #5a5a5a;
-        }
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            padding: 20px;
+            height: 100vh;
+            margin: 0;
         }
-
-        /* Ô khung chính màu xám */
-        .lock-container {
-            background-color: var(--card-bg);
-            padding: 40px 30px 30px 30px;
+        .box {
+            background-color: #1e1e1e;
+            padding: 32px 24px;
             border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            width: 100%;
+            width: 90%;
             max-width: 380px;
             text-align: center;
-            position: relative;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
             border: 1px solid #2a2a2a;
         }
-
-        /* Menu 3 chấm góc trên bên trái */
-        .menu-container {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-        }
-
-        .menu-btn {
-            background: none;
-            border: none;
-            color: var(--text-color);
-            font-size: 22px;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-
-        .menu-btn:hover {
-            background-color: var(--input-bg);
-        }
-
-        .dropdown {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: var(--input-bg);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            z-index: 10;
-            border: 1px solid var(--accent);
-        }
-
-        .dropdown.show {
-            display: block;
-            width: 130px;
-        }
-
-        .dropdown button {
-            width: 100%;
-            padding: 10px 12px;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            text-align: left;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-
-        .dropdown button:hover {
-            background-color: var(--accent);
-        }
-
         h2 {
-            margin-top: 15px;
+            margin-top: 0;
             margin-bottom: 8px;
             font-size: 22px;
-            color: #ffffff;
-            word-break: break-word;
         }
-
-        .subtitle {
+        p#subText {
             color: #a0a0a0;
             font-size: 14px;
-            margin-bottom: 25px;
+            margin-top: 0;
+            margin-bottom: 20px;
         }
-
-        /* Ô nhập mật khẩu */
-        input[type="password"] {
+        
+        /* Khung chứa input + icon mắt */
+        .password-wrapper {
+            position: relative;
             width: 100%;
-            padding: 12px 15px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--accent);
+            margin-bottom: 16px;
+        }
+        .password-wrapper input {
+            width: 100%;
+            padding: 12px 42px 12px 14px;
+            background: #282828;
+            border: 1px solid #3a3a3a;
             color: #ffffff;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 15px;
-            margin-bottom: 18px;
             outline: none;
-            transition: border-color 0.3s;
+            transition: border-color 0.2s;
         }
-
-        input[type="password"]:focus {
-            border-color: #888888;
+        .password-wrapper input:focus {
+            border-color: #666;
         }
-
-        /* Nút Mở khóa */
-        .unlock-btn {
-            width: 100%;
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 15px;
-            font-weight: 600;
-            border-radius: 6px;
+        .eye-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
             cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .unlock-btn:hover:not(:disabled) {
-            background-color: var(--accent-hover);
-        }
-
-        /* Khi bị khóa (disabled) */
-        input:disabled, button:disabled {
-            opacity: 0.4;
-            cursor: not-allowed !important;
-            background-color: #1a1a1a !important;
-        }
-
-        /* Thông báo lỗi & Cảnh báo khóa */
-        .error-msg {
-            color: #ff5252;
-            margin-top: 15px;
-            font-size: 13px;
-            display: none;
-        }
-
-        .lockout-msg {
-            color: #ff9800;
-            margin-top: 15px;
-            font-size: 13px;
-            display: none;
-            line-height: 1.4;
-        }
-
-        /* Popup Modal xem thông tin */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.75);
-            justify-content: center;
+            color: #888888;
+            display: flex;
             align-items: center;
-            z-index: 100;
-            padding: 20px;
+            justify-content: center;
+            user-select: none;
+            transition: color 0.2s;
         }
-
-        .modal-content {
-            background: var(--card-bg);
-            padding: 25px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 320px;
-            text-align: left;
-            border: 1px solid var(--accent);
-        }
-
-        .modal-content h3 {
-            margin-bottom: 12px;
-            color: #ffffff;
-        }
-
-        .modal-content p {
-            font-size: 14px;
+        .eye-icon:hover {
             color: #cccccc;
-            line-height: 1.5;
-            white-space: pre-wrap;
-            word-break: break-word;
+        }
+        .eye-icon svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
-        .close-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 18px;
+        /* Nút mở khóa bo tròn nhẹ & nổi cực nhẹ */
+        button.btn-unlock {
+            width: 100%;
+            padding: 12px 20px;
+            background: #2e2e2e;
+            color: #ffffff;
+            border: 1px solid #444444;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
             cursor: pointer;
-            border-radius: 5px;
-            margin-top: 20px;
-            float: right;
-            font-size: 13px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+            transition: all 0.2s ease;
+        }
+        button.btn-unlock:hover {
+            background: #383838;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+            transform: translateY(-1px);
+        }
+        button.btn-unlock:active {
+            transform: translateY(0);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
-        .close-btn:hover {
-            background-color: var(--accent-hover);
+        .error {
+            color: #ff5252;
+            margin-top: 14px;
+            margin-bottom: 0;
+            font-size: 13.5px;
+        }
+
+        /* Thông báo sao chép tùy chỉnh (Custom Toast) */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #2d2d2d;
+            color: #fff;
+            padding: 12px 22px;
+            border-radius: 25px;
+            font-size: 14px;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            border: 1px solid #444;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
     </style>
 </head>
 <body>
 
-    <div class="lock-container">
-        <!-- Nút 3 chấm và menu -->
-        <div class="menu-container">
-            <button class="menu-btn" onclick="toggleMenu()" title="Tùy chọn">⋮</button>
-            <div class="dropdown" id="dropdownMenu">
-                <button onclick="showInfo()">Thông tin</button>
-                <button onclick="shareLink()">Chia sẻ</button>
-            </div>
-        </div>
-
-        <!-- Tiêu đề và mô tả -->
-        <h2 id="charName">Đang tải...</h2>
-        <p class="subtitle" id="subtitleText">Vui lòng nhập mật khẩu để mở khóa</p>
-
-        <!-- Ô nhập & nút bấm -->
-        <input type="password" id="passwordInput" placeholder="Mật khẩu..." onkeypress="handleEnter(event)">
-        <button id="unlockBtn" class="unlock-btn" onclick="unlock()">Mở khóa</button>
+    <div class="box" id="mainBox">
+        <h2 id="charName">Đang kết nối...</h2>
+        <p id="subText">Vui lòng đợi giây lát</p>
         
-        <!-- Thông báo -->
-        <p class="error-msg" id="errorMsg"></p>
-        <p class="lockout-msg" id="lockoutMsg"></p>
+        <div id="formArea" style="display:none;">
+            <div class="password-wrapper">
+                <input type="password" id="passInput" placeholder="Nhập mật khẩu...">
+                <span class="eye-icon" id="togglePassword" onclick="togglePass()">
+                    <!-- SVG con mắt mở -->
+                    <svg id="eyeOpen" viewBox="0 0 24 24">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <!-- SVG con mắt đóng -->
+                    <svg id="eyeClosed" viewBox="0 0 24 24" style="display:none;">
+                        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                        <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                </span>
+            </div>
+            <button class="btn-unlock" onclick="tryUnlock()">Mở khóa</button>
+        </div>
+        
+        <p class="error" id="errMsg"></p>
     </div>
 
-    <!-- Modal Thông tin -->
-    <div class="modal" id="infoModal">
-        <div class="modal-content">
-            <h3>Thông tin</h3>
-            <p id="charInfo">Đang tải thông tin...</p>
-            <button class="close-btn" onclick="closeInfo()">Đóng</button>
-        </div>
-    </div>
+    <!-- Khung thông báo kiểu mới -->
+    <div id="toast" class="toast">Đã sao chép liên kết!</div>
 
     <script>
-        // ==========================================
-        // 1. ĐIỀN THÔNG TIN SUPABASE CỦA BẠN VÀO ĐÂY
-        // ==========================================
-        const SUPABASE_URL = 'https://akufleimlxcnftsdmejq.supabase.co'; // Thay bằng Project URL của bạn
-        const SUPABASE_KEY = 'sb_publishable_g4T5Js-z7iFpSF9ebl5xtQ_HJMUmOKB';              // Thay bằng Anon Public Key của bạn
+        const SUPABASE_URL = 'https://akufleimlxcnftsdmejq.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_g4T5Js-z7iFpSF9ebl5xtQ_HJMUmOKB';
 
-        // Khởi tạo Supabase client
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        // ==========================================
-        // 2. LẤY ID NHÂN VẬT TỪ ĐƯỜNG LINK
-        // ==========================================
-        // Ưu tiên 1: Lấy từ tham số URL `?id=ten_id` (Ví dụ: https://domain.com/?id=goku)
-        // Ưu tiên 2: Lấy từ subdomain (Ví dụ: https://goku.domain.com)
         const urlParams = new URLSearchParams(window.location.search);
-        let charId = urlParams.get('id');
+        const charId = urlParams.get('id');
 
-        if (!charId) {
-            let hostParts = window.location.hostname.split('.');
-            charId = (hostParts.length > 2 && hostParts[0] !== 'www') ? hostParts[0] : 'nhanvat1';
-        }
-        charId = charId.toLowerCase(); // Chuyển về chữ thường
-
-        // Cấu hình giới hạn nhập sai (3 lần -> khóa 24h)
-        const MAX_ATTEMPTS = 3;
-        const LOCKOUT_DURATION = 24 * 60 * 60 * 1000; // 24 giờ tính bằng ms
-
-        // ==========================================
-        // 3. XỬ LÝ KHÓA TRÌNH DUYỆT (LOCALSTORAGE)
-        // ==========================================
-        function checkLockoutStatus() {
-            const lockData = JSON.parse(localStorage.getItem(`lock_${charId}`)) || { attempts: 0, lockUntil: 0 };
-            const now = Date.now();
-
-            if (lockData.lockUntil > now) {
-                applyLockoutUI();
-                return true;
-            } else if (lockData.lockUntil > 0 && lockData.lockUntil <= now) {
-                localStorage.removeItem(`lock_${charId}`);
-                return false;
+        async function init() {
+            if (!charId) {
+                document.getElementById('charName').innerText = "Thiếu ID nhân vật!";
+                document.getElementById('subText').innerText = "Hãy truy cập dạng: ?id=ten_nhan_vat";
+                return;
             }
-            return false;
-        }
-
-        function applyLockoutUI() {
-            document.getElementById('passwordInput').disabled = true;
-            document.getElementById('unlockBtn').disabled = true;
-            document.getElementById('errorMsg').style.display = 'none';
-            
-            const lockoutMsg = document.getElementById('lockoutMsg');
-            lockoutMsg.innerText = "Bạn đã nhập sai quá 3 lần. Ô nhập đã bị khóa trong 24 giờ.";
-            lockoutMsg.style.display = 'block';
-            document.getElementById('subtitleText').innerText = "Truy cập tạm thời bị khóa";
-        }
-
-        function recordFailedAttempt() {
-            let lockData = JSON.parse(localStorage.getItem(`lock_${charId}`)) || { attempts: 0, lockUntil: 0 };
-            lockData.attempts += 1;
-
-            if (lockData.attempts >= MAX_ATTEMPTS) {
-                lockData.lockUntil = Date.now() + LOCKOUT_DURATION;
-                localStorage.setItem(`lock_${charId}`, JSON.stringify(lockData));
-                applyLockoutUI();
-            } else {
-                localStorage.setItem(`lock_${charId}`, JSON.stringify(lockData));
-                const errorMsg = document.getElementById('errorMsg');
-                errorMsg.innerText = `Mật khẩu không chính xác! Bạn còn ${MAX_ATTEMPTS - lockData.attempts} lần thử.`;
-                errorMsg.style.display = 'block';
-            }
-        }
-
-        // ==========================================
-        // 4. LOAD DỮ LIỆU TỪ SUPABASE
-        // ==========================================
-        async function loadData() {
-            checkLockoutStatus();
 
             try {
-                // Gọi hàm RPC get_character_info từ Supabase
                 const { data, error } = await supabaseClient.rpc('get_character_info', { char_id: charId });
+
+                if (error) {
+                    document.getElementById('charName').innerText = "Lỗi Database!";
+                    document.getElementById('errMsg').innerText = error.message;
+                    return;
+                }
 
                 if (data && data.name) {
                     document.getElementById('charName').innerText = data.name;
-                    document.getElementById('charInfo').innerText = data.info || "Không có thông tin thêm.";
+                    document.getElementById('subText').innerText = "Vui lòng nhập mật khẩu để mở khóa";
+                    document.getElementById('formArea').style.display = 'block';
                 } else {
-                    document.getElementById('charName').innerText = "Không tìm thấy nhân vật";
-                    document.getElementById('subtitleText').innerText = "Vui lòng kiểm tra lại đường link (id)";
-                    document.getElementById('passwordInput').disabled = true;
-                    document.getElementById('unlockBtn').disabled = true;
+                    document.getElementById('charName').innerText = "Không tìm thấy!";
+                    document.getElementById('subText').innerText = "ID '" + charId + "' không tồn tại.";
                 }
             } catch (err) {
-                console.error("Lỗi kết nối Supabase:", err);
-                document.getElementById('charName').innerText = "Lỗi kết nối";
-                document.getElementById('subtitleText').innerText = "Không thể lấy dữ liệu từ máy chủ";
+                document.getElementById('charName').innerText = "Lỗi kết nối!";
+                document.getElementById('errMsg').innerText = err.message;
             }
         }
 
-        // Chạy loadData ngay khi mở trang
-        loadData();
+        // Bật/tắt ẩn hiện mật khẩu
+        function togglePass() {
+            const passInput = document.getElementById('passInput');
+            const eyeOpen = document.getElementById('eyeOpen');
+            const eyeClosed = document.getElementById('eyeClosed');
 
-        // ==========================================
-        // 5. XỬ LÝ MỞ KHÓA
-        // ==========================================
-        async function unlock() {
-            if (checkLockoutStatus()) return;
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeOpen.style.display = 'none';
+                eyeClosed.style.display = 'block';
+            } else {
+                passInput.type = 'password';
+                eyeOpen.style.display = 'block';
+                eyeClosed.style.display = 'none';
+            }
+        }
 
-            const passInput = document.getElementById('passwordInput');
-            const pass = passInput.value.trim();
+        // Hàm hiện thông báo tùy chỉnh
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        async function tryUnlock() {
+            const pass = document.getElementById('passInput').value;
             if (!pass) return;
 
-            const btn = document.getElementById('unlockBtn');
-            btn.innerText = "Đang kiểm tra...";
-            btn.disabled = true;
-
-            try {
-                // Gọi hàm RPC unlock_link từ Supabase
-                const { data: secretLink, error } = await supabaseClient.rpc('unlock_link', { 
-                    char_id: charId, 
-                    pass: pass 
-                });
-
-                btn.innerText = "Mở khóa";
-                btn.disabled = false;
-
-                if (secretLink) {
-                    // Thành công: xóa lịch sử nhập sai và chuyển hướng
-                    localStorage.removeItem(`lock_${charId}`);
-                    document.getElementById('errorMsg').style.display = 'none';
-                    window.location.href = secretLink;
-                } else {
-                    // Thất bại: ghi nhận nhập sai
-                    recordFailedAttempt();
-                    passInput.value = '';
-                }
-            } catch (err) {
-                console.error(err);
-                btn.innerText = "Mở khóa";
-                btn.disabled = false;
-                alert("Lỗi kết nối máy chủ! Vui lòng thử lại sau.");
-            }
-        }
-
-        // ==========================================
-        // 6. CÁC HÀM GIAO DIỆN PHỤ (MENU, MODAL, SHARE)
-        // ==========================================
-        function toggleMenu() {
-            document.getElementById('dropdownMenu').classList.toggle('show');
-        }
-
-        // Đóng dropdown khi click ra ngoài
-        window.onclick = function(event) {
-            if (!event.target.matches('.menu-btn')) {
-                const dropdown = document.getElementById('dropdownMenu');
-                if (dropdown && dropdown.classList.contains('show')) {
-                    dropdown.classList.remove('show');
-                }
-            }
-        }
-
-        function showInfo() { 
-            document.getElementById('infoModal').style.display = 'flex'; 
-        }
-
-        function closeInfo() { 
-            document.getElementById('infoModal').style.display = 'none'; 
-        }
-
-        function shareLink() {
-            navigator.clipboard.writeText(window.location.href).then(() => {
-                alert("Đã sao chép đường link dẫn tới ô mở khóa này!");
-            }).catch(() => {
-                alert("Không thể tự động chép link. Vui lòng copy link trên thanh địa chỉ.");
+            const { data: secretLink, error } = await supabaseClient.rpc('unlock_link', { 
+                char_id: charId, 
+                pass: pass 
             });
+
+            if (secretLink) {
+                window.location.href = secretLink;
+            } else {
+                document.getElementById('errMsg').innerText = "Mật khẩu không chính xác!";
+            }
         }
 
-        function handleEnter(e) {
-            if (e.key === 'Enter') unlock();
-        }
+        init();
     </script>
 </body>
 </html>
